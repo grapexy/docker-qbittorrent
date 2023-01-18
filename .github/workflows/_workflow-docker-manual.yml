@@ -89,15 +89,13 @@ jobs:
             docker build \
               --tag ${{ github.repository }}:${{ steps.generate_temporary_tag_name.outputs.test_tag }} \
               --tag ${{ github.repository }}:latest \
-              --tag ${{ github.repository }}:${{ steps.identify_github_release_tag_name.outputs.tag }} \
               --tag ${{ github.repository }}:${{ env.full_release_tag }} \
               --tag ${{ github.repository }}:${{ env.primary_release_tag }} \
               --tag ghcr.io/${{ github.repository }}:${{ steps.generate_temporary_tag_name.outputs.test_tag }} \
               --tag ghcr.io/${{ github.repository }}:latest \
-              --tag ghcr.io/${{ github.repository }}:${{ steps.identify_github_release_tag_name.outputs.tag }} \
               --tag ghcr.io/${{ github.repository }}:${{ env.full_release_tag }} \
               --tag ghcr.io/${{ github.repository }}:${{ env.primary_release_tag }} \
-              --build-arg release_tag_name=${{ steps.identify_github_release_tag_name.outputs.tag }} \
+              --build-arg release_tag_name=${{ steps.generate_temporary_tag_name.outputs.test_tag }} \
               .
       
       - name: DEBUG Show built Docker Images
