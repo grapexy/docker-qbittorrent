@@ -73,7 +73,8 @@ jobs:
       - name: Generate app name
         shell: bash
         run: |
-          app_name=$(echo "${GITHUB_REPOSITORY}" | grep -P -o -m 1 '(?<=/arch-).*')
+          set -ex
+          app_name="${{ github.event.repository.name }}"
           echo "[debug] Generated app name is '${app_name}'"
           echo "::set-output name=app_name::$app_name"
         id: generate_app_name
