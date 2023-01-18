@@ -40,12 +40,12 @@ RUN \
   install -v -m755 unrar /usr/bin && \
   echo "**** install qbittorrent ****" && \  
   if [ -z ${QBITTORRENT_VERSION+x} ]; then \
-    QBITTORRENT_VERSION=$(curl -sL "https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases" | \
+    QBITTORRENT_VERSION=$(curl -sL "https://api.github.com/repos/grapexy/qbittorrent-nox-static/releases" | \
     jq -r 'first(.[] | select(.prerelease == true) | .tag_name)'); \
   fi && \
   curl -o \
     /app/qbittorrent-nox -L \
-    "https://github.com/userdocs/qbittorrent-nox-static/releases/download/${QBITTORRENT_VERSION}/x86_64-qbittorrent-nox" && \
+    "https://github.com/grapexy/qbittorrent-nox-static/releases/download/${QBITTORRENT_VERSION}/x86_64-qbittorrent-nox" && \
   chmod +x /app/qbittorrent-nox && \
   echo "***** install qbitorrent-cli ****" && \
   mkdir /qbt && \

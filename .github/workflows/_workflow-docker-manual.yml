@@ -1,0 +1,126 @@
+name: _workflow-docker-manual
+
+on:
+  workflow_dispatch:
+
+jobs:
+  gcr-dockerhub-build-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Login to GitHub
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: DEBUG Show Runners environment
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 5
+          max_attempts: 3
+          retry_wait_seconds: 120
+          command: |
+            export
+      
+      - name: Identify GitHub Release tag name
+        # get tag name from runners environment 'GITHUB_REF' and then use bash substring
+        # to strip out '+' symbol - required due to gcr not supporting this as a tag
+        # name (docker hub does support it).
+        # note if push is NOT triggered by tag then 'GITHUB_REF' will be the branch name.
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 5
+          max_attempts: 3
+          retry_wait_seconds: 120
+          command: |
+            echo "##[set-output name=tag;]$(tag_name=${GITHUB_REF#refs/tags/} && echo "${tag_name//+/-}")"
+        id: identify_github_release_tag_name
+      
+      - name: Generate temporary tag name
+        shell: bash
+        run: |
+          test_tag=$(date +%Y%m%d%H%M%S)
+          echo "[debug] Generated test tag name is '${test_tag}'"
+          echo "::set-output name=test_tag::$test_tag"
+        id: generate_temporary_tag_name
+      
+      - name: Generate release tag names
+        shell: bash
+        run: |
+          nox_release=$(curl -sL "https://api.github.com/repos/grapexy/qbittorrent-nox-static/releases" |  jq -r 'first(.[] | select(.prerelease == true) | .tag_name)')
+          full_release_tag=$(echo $nox_release | grep -oP "(?<=release-).+")
+          primary_release_tag=$(echo $full_tag | grep -oP "[\d.]+" | head -1)
+          echo "full_release_tag=$full_release_tag" >> $GITHUB_ENV
+          echo "primary_release_tag=$primary_release_tag" >> $GITHUB_ENV
+      
+      - name: Generate app name
+        shell: bash
+        run: |
+          app_name=$(echo "${GITHUB_REPOSITORY}" | grep -P -o -m 1 '(?<=/arch-).*')
+          echo "[debug] Generated app name is '${app_name}'"
+          echo "::set-output name=app_name::$app_name"
+        id: generate_app_name
+      
+      - name: Build Docker image and tag
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 60
+          max_attempts: 3
+          retry_wait_seconds: 120
+          command: |
+            docker build \
+              --tag ${{ github.repository }}:${{ steps.generate_temporary_tag_name.outputs.test_tag }} \
+              --tag ${{ github.repository }}:latest \
+              --tag ${{ github.repository }}:${{ steps.identify_github_release_tag_name.outputs.tag }} \
+              --tag ${{ github.repository }}:${{ env.full_release_tag }} \
+              --tag ${{ github.repository }}:${{ env.primary_release_tag }} \
+              --tag ghcr.io/${{ github.repository }}:${{ steps.generate_temporary_tag_name.outputs.test_tag }} \
+              --tag ghcr.io/${{ github.repository }}:latest \
+              --tag ghcr.io/${{ github.repository }}:${{ steps.identify_github_release_tag_name.outputs.tag }} \
+              --tag ghcr.io/${{ github.repository }}:${{ env.full_release_tag }} \
+              --tag ghcr.io/${{ github.repository }}:${{ env.primary_release_tag }} \
+              --build-arg release_tag_name=${{ steps.identify_github_release_tag_name.outputs.tag }} \
+              .
+      
+      - name: DEBUG Show built Docker Images
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 5
+          max_attempts: 3
+          retry_wait_seconds: 120
+          command: |
+            docker images
+      
+      - name: Push Docker image to Docker Hub
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 30
+          max_attempts: 3
+          retry_wait_seconds: 120
+          command: |
+            docker push ${{ github.repository }}:latest
+            docker push ${{ github.repository }}:${{ steps.identify_github_release_tag_name.outputs.tag }}
+            docker push ${{ github.repository }}:${{ env.full_release_tag }}
+            docker push ${{ github.repository }}:${{ env.primary_release_tag }}
+      
+      - name: Push Docker image to GitHub Container Registry (GHCR)
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 30
+          max_attempts: 3
+          retry_wait_seconds: 120
+          command: |
+            docker push ghcr.io/${{ github.repository }}:latest
+            docker push ghcr.io/${{ github.repository }}:${{ steps.identify_github_release_tag_name.outputs.tag }}
+            docker push ghcr.io/${{ github.repository }}:${{ env.full_release_tag }}
+            docker push ghcr.io/${{ github.repository }}:${{ env.primary_release_tag }}

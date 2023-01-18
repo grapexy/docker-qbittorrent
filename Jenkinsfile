@@ -105,7 +105,7 @@ pipeline {
       steps{
         script{
           env.EXT_RELEASE = sh(
-            script: ''' curl -sL 'https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases' | jq -r 'first(.[] | select(.prerelease == true) | .tag_name)' ''',
+            script: ''' curl -sL 'https://api.github.com/repos/grapexy/qbittorrent-nox-static/releases' | jq -r 'first(.[] | select(.prerelease == true) | .tag_name)' ''',
             returnStdout: true).trim()
             env.RELEASE_LINK = 'custom_command'
         }
