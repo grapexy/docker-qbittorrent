@@ -63,6 +63,7 @@ jobs:
       - name: Generate release tag names
         shell: bash
         run: |
+          set -ex
           nox_release=$(curl -sL "https://api.github.com/repos/grapexy/qbittorrent-nox-static/releases" |  jq -r 'first(.[] | select(.prerelease == true) | .tag_name)')
           full_release_tag=$(echo $nox_release | grep -oP "(?<=release-).+")
           primary_release_tag=$(echo $full_tag | grep -oP "[\d.]+" | head -1)
