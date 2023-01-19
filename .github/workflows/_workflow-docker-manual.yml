@@ -10,13 +10,13 @@ jobs:
       fail-fast: false
       matrix:
         qbittorrent_debug: [ no, yes ]
-      include:
-        - qbittorrent_debug: "no"
-          debug_tag: ""
-        
-        - qbittorrent_debug: "yes"
-          debug_tag: "-debug"
-    
+        include:
+          - qbittorrent_debug: "no"
+            debug_tag: ""
+          
+          - qbittorrent_debug: "yes"
+            debug_tag: "-debug"
+      
     steps:
       - name: Checkout
         uses: actions/checkout@v2
