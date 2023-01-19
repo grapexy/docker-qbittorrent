@@ -9,14 +9,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        qbittorrent_debug: [ no, yes ]
-        include:
-          - qbittorrent_debug: "no"
-            debug_tag: ""
-          
-          - qbittorrent_debug: "yes"
-            debug_tag: "-debug"
-      
+        qbittorrent_debug_tag: [ "", "-debug" ]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -98,15 +92,15 @@ jobs:
           retry_wait_seconds: 120
           command: |
             docker build \
-              --tag ${{ github.repository }}:${{ steps.generate_temporary_tag_name.outputs.test_tag }}${{ matrix.debug_tag }} \
-              --tag ${{ github.repository }}:latest${{ matrix.debug_tag }} \
-              --tag ${{ github.repository }}:${{ env.full_release_tag }}${{ matrix.debug_tag }} \
-              --tag ${{ github.repository }}:${{ env.primary_release_tag }}${{ matrix.debug_tag }} \
-              --tag ghcr.io/${{ github.repository }}:${{ steps.generate_temporary_tag_name.outputs.test_tag }}${{ matrix.debug_tag }} \
-              --tag ghcr.io/${{ github.repository }}:latest${{ matrix.debug_tag }} \
-              --tag ghcr.io/${{ github.repository }}:${{ env.full_release_tag }}${{ matrix.debug_tag }} \
-              --tag ghcr.io/${{ github.repository }}:${{ env.primary_release_tag }}${{ matrix.debug_tag }} \
-              --build-arg QBITTORRENT_DEBUG=${{ matrix.qbittorrent_debug }} \
+              --tag ${{ github.repository }}:${{ steps.generate_temporary_tag_name.outputs.test_tag }}${{ matrix.qbittorrent_debug_tag }} \
+              --tag ${{ github.repository }}:latest${{ matrix.qbittorrent_debug_tag }} \
+              --tag ${{ github.repository }}:${{ env.full_release_tag }}${{ matrix.qbittorrent_debug_tag }} \
+              --tag ${{ github.repository }}:${{ env.primary_release_tag }}${{ matrix.qbittorrent_debug_tag }} \
+              --tag ghcr.io/${{ github.repository }}:${{ steps.generate_temporary_tag_name.outputs.test_tag }}${{ matrix.qbittorrent_debug_tag }} \
+              --tag ghcr.io/${{ github.repository }}:latest${{ matrix.qbittorrent_debug_tag }} \
+              --tag ghcr.io/${{ github.repository }}:${{ env.full_release_tag }}${{ matrix.qbittorrent_debug_tag }} \
+              --tag ghcr.io/${{ github.repository }}:${{ env.primary_release_tag }}${{ matrix.qbittorrent_debug_tag }} \
+              --build-arg QBITTORRENT_DEBUG_TAG=${{ matrix.qbittorrent_debug_tag }} \
               .
       
       - name: DEBUG Show built Docker Images
@@ -125,10 +119,10 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 120
           command: |
-            docker push ${{ github.repository }}:latest${{ matrix.debug_tag }}
-            docker push ${{ github.repository }}:${{ steps.identify_github_release_tag_name.outputs.tag }}${{ matrix.debug_tag }}
-            docker push ${{ github.repository }}:${{ env.full_release_tag }}${{ matrix.debug_tag }}
-            docker push ${{ github.repository }}:${{ env.primary_release_tag }}${{ matrix.debug_tag }}
+            docker push ${{ github.repository }}:latest${{ matrix.qbittorrent_debug_tag }}
+            docker push ${{ github.repository }}:${{ steps.identify_github_release_tag_name.outputs.tag }}${{ matrix.qbittorrent_debug_tag }}
+            docker push ${{ github.repository }}:${{ env.full_release_tag }}${{ matrix.qbittorrent_debug_tag }}
+            docker push ${{ github.repository }}:${{ env.primary_release_tag }}${{ matrix.qbittorrent_debug_tag }}
       
       - name: Push Docker image to GitHub Container Registry (GHCR)
         uses: nick-fields/retry@v2
@@ -137,7 +131,7 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 120
           command: |
-            docker push ghcr.io/${{ github.repository }}:latest${{ matrix.debug_tag }}
-            docker push ghcr.io/${{ github.repository }}:${{ steps.identify_github_release_tag_name.outputs.tag }}${{ matrix.debug_tag }}
-            docker push ghcr.io/${{ github.repository }}:${{ env.full_release_tag }}${{ matrix.debug_tag }}
-            docker push ghcr.io/${{ github.repository }}:${{ env.primary_release_tag }}${{ matrix.debug_tag }}
+            docker push ghcr.io/${{ github.repository }}:latest${{ matrix.qbittorrent_debug_tag }}
+            docker push ghcr.io/${{ github.repository }}:${{ steps.identify_github_release_tag_name.outputs.tag }}${{ matrix.qbittorrent_debug_tag }}
+            docker push ghcr.io/${{ github.repository }}:${{ env.full_release_tag }}${{ matrix.qbittorrent_debug_tag }}
+            docker push ghcr.io/${{ github.repository }}:${{ env.primary_release_tag }}${{ matrix.qbittorrent_debug_tag }}

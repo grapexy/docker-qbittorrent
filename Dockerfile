@@ -7,7 +7,7 @@ ARG BUILD_DATE
 ARG VERSION
 ARG QBITTORRENT_VERSION
 ARG QBT_VERSION
-ARG QBITTORRENT_DEBUG
+ARG QBITTORRENT_DEBUG_TAG
 LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="thespad"
 
@@ -46,7 +46,7 @@ RUN \
   fi && \
   curl -o \
     /app/qbittorrent-nox -L \
-    "https://github.com/grapexy/qbittorrent-nox-static/releases/download/${QBITTORRENT_VERSION}/x86_64-debug_{$QBITTORRENT_DEBUG}-qbittorrent-nox" && \
+    "https://github.com/grapexy/qbittorrent-nox-static/releases/download/${QBITTORRENT_VERSION}/x86_64${QBITTORRENT_DEBUG_TAG}-qbittorrent-nox" && \
   chmod +x /app/qbittorrent-nox && \
   echo "***** install qbitorrent-cli ****" && \
   mkdir /qbt && \
