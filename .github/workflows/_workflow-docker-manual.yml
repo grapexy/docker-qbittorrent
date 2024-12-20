@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        qbittorrent_debug_tag: [ "", "-debug" ]
+        qbittorrent_debug_tag: ["-debug"]
 
     steps:
       - name: Checkout
