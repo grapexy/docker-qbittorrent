@@ -1,4 +1,5 @@
 #!/usr/bin/with-contenv bash
+# shellcheck shell=bash
 
 # qbt bash wrapper to prompt user when trying to save password
 if [[ "$@" == "settings set password" ]]; then
